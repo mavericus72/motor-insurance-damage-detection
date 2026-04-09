@@ -12,7 +12,8 @@ device = "cpu"  # Render uses CPU
 model = models.resnet18(weights=None)
 model.fc = nn.Linear(model.fc.in_features, 2)
 model_path = os.path.join(os.path.dirname(__file__), "model.pth")
-model.load_state_dict(torch.load(model_path, map_location=device))model.to(device)
+model.load_state_dict(torch.load(model_path, map_location=device))
+model.to(device)
 model.eval()
 
 class_names = ['damage', 'no_damage']
