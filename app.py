@@ -3,6 +3,7 @@ from PIL import Image
 import torch
 from torchvision import transforms, models
 from torch import nn
+import os
 
 app = FastAPI()
 
@@ -10,8 +11,8 @@ device = "cpu"  # Render uses CPU
 
 model = models.resnet18(weights=None)
 model.fc = nn.Linear(model.fc.in_features, 2)
-model.load_state_dict(torch.load("model.pth", map_location=device))
-model.to(device)
+model_path = os.path.join(os.path.dirname(__file__), "model.pth")
+model.load_state_dict(torch.load(model_path, map_location=device))model.to(device)
 model.eval()
 
 class_names = ['damage', 'no_damage']
