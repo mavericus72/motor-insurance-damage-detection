@@ -7,17 +7,27 @@ from torch import nn
 app = FastAPI()
 
 # Downlaod Model
-MODEL_URL = "https://drive.google.com/uc?id=1Mbl_M8uvY_Riy-TPALQqA4k1XRy_WQrY"
+MODEL_URL = "https://raw.githubusercontent.com/mavericus72/motor-insurance-damage-detection/main/model.pth"
 MODEL_PATH = "model.pth"
 
 def download_model():
     if not os.path.exists(MODEL_PATH):
         print("Downloading model...")
-        response = requests.get(MODEL_URL, stream=True)
-        with open(MODEL_PATH, "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
-        print("Model downloaded.")
+        try:
+            response = requests.get(MODEL_URL, stream=True)
+
+            if response.status_code != 200:
+                raise Exception("Failed to download model")
+
+            with open(MODEL_PATH, "wb") as f:
+                for chunk in response.iter_content(8192):
+                    f.write(chunk)
+
+            print("Model downloaded successfully!")
+
+        except Exception as e:
+            print("ERROR downloading model:", e)
+            raise e  # this will show error in logs
     else:
         print("Model already exists.")
 
