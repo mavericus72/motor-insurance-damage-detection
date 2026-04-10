@@ -3,6 +3,7 @@ from PIL import Image
 import torch
 from torchvision import transforms, models
 from torch import nn
+import os
 
 app = FastAPI()
 
