@@ -29,14 +29,14 @@ download_model()
 # Load model
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-model = models.resnet18(weights=False) # Instead of pretrained=False use weights=False 
-model.fc = nn.Sequential(
+model1 = models.resnet18(weights=False) # Instead of pretrained=False use weights=False 
+model1.fc = nn.Sequential(
     nn.Dropout(0.5),
-    nn.Linear(model.fc.in_features, 2)
+    nn.Linear(model1.fc.in_features, 2)
 )
-model.load_state_dict(torch.load("model1.pth", map_location=device))
-model.to(device)
-model.eval()
+model1.load_state_dict(torch.load("model1.pth", map_location=device))
+model1.to(device)
+model1.eval()
 
 # Class names
 class_names = ['damage', 'no_damage']
@@ -59,7 +59,7 @@ async def predict(file: UploadFile = File(...)):
     image = transform(image).unsqueeze(0).to(device)
 
     with torch.no_grad():
-        outputs = model(image)
+        outputs = model1(image)
         pred = torch.argmax(outputs, dim=1).item()
 
     return {"prediction": class_names[pred]}
