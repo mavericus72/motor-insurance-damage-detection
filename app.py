@@ -34,7 +34,7 @@ model1.fc = nn.Sequential(
     nn.Dropout(0.5),
     nn.Linear(model1.fc.in_features, 2)
 )
-model1.load_state_dict(torch.load("model1.pth", map_location=device))
+model1.load_state_dict(torch.load("model1.pth", map_location=device, weights_only=False))
 model1.to(device)
 model1.eval()
 
