@@ -4,31 +4,22 @@ import torch
 from torchvision import transforms, models
 from torch import nn
 import os
+import requests
 
 app = FastAPI()
 
-# Downlaod Model
-MODEL_URL = "https://raw.githubusercontent.com/mavericus72/motor-insurance-damage-detection/main/model.pth"
-MODEL_PATH = "model.pth"
+# ------------------ DOWNLOAD MODEL ------------------
+MODEL_URL = "https://drive.google.com/uc?id=1iORK7v3n-L-FKU4Pfz-p2o1CTwoFHSzS"
+MODEL_PATH = "model1.pth"
 
 def download_model():
     if not os.path.exists(MODEL_PATH):
         print("Downloading model...")
-        try:
-            response = requests.get(MODEL_URL, stream=True)
-
-            if response.status_code != 200:
-                raise Exception("Failed to download model")
-
-            with open(MODEL_PATH, "wb") as f:
-                for chunk in response.iter_content(8192):
-                    f.write(chunk)
-
-            print("Model downloaded successfully!")
-
-        except Exception as e:
-            print("ERROR downloading model:", e)
-            raise e  # this will show error in logs
+        response = requests.get(MODEL_URL, stream=True)
+        with open(MODEL_PATH, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        print("Model downloaded.")
     else:
         print("Model already exists.")
 
@@ -38,9 +29,12 @@ download_model()
 # Load model
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-model = models.resnet18(pretrained=False)
-model.fc = nn.Linear(model.fc.in_features, 2)
-model.load_state_dict(torch.load("model.pth", map_location=device))
+model = models.resnet18(weights=False) # Instead of pretrained=False use weights=False 
+model.fc = nn.Sequential(
+    nn.Dropout(0.5),
+    nn.Linear(model.fc.in_features, 2)
+)
+model.load_state_dict(torch.load("model1.pth", map_location=device))
 model.to(device)
 model.eval()
 
@@ -50,7 +44,9 @@ class_names = ['damage', 'no_damage']
 # Transform
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
-    transforms.ToTensor()
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], # Normalize the input data since we use the pre-trained model
+                         [0.229, 0.224, 0.225])
 ])
 
 @app.get("/")
