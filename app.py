@@ -29,7 +29,7 @@ download_model()
 # Load model
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-model1 = models.resnet18(weights=False) # Instead of pretrained=False use weights=False 
+model1 = models.resnet18(pretrained=False) # Instead of pretrained=False use weights=False 
 model1.fc = nn.Sequential(
     nn.Dropout(0.5),
     nn.Linear(model1.fc.in_features, 2)
