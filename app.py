@@ -1,3 +1,5 @@
+## Fast API code for model1 (EfficientNetB0)
+
 from fastapi import FastAPI, File, UploadFile
 from PIL import Image
 import torch
@@ -9,8 +11,8 @@ import requests
 app = FastAPI()
 
 # ------------------ DOWNLOAD MODEL ------------------
-MODEL_URL = "https://github.com/mavericus72/motor-insurance-damage-detection/raw/refs/heads/main/model1.pth"
-MODEL_PATH = "model1.pth"
+MODEL_URL = "https://github.com/mavericus72/motor-insurance-damage-detection/raw/refs/heads/main/efficientnet_model.pth"
+MODEL_PATH = "efficientnet_model.pth"
 
 def download_model():
     if not os.path.exists(MODEL_PATH):
@@ -29,14 +31,16 @@ download_model()
 # Load model
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-model1 = models.resnet18(pretrained=False) # Instead of pretrained=False use weights=False 
-model1.fc = nn.Sequential(
+model = models.efficientnet_b0(pretrained=False)
+
+model.classifier[1] = nn.Sequential(
     nn.Dropout(0.5),
-    nn.Linear(model1.fc.in_features, 2)
+    nn.Linear(model.classifier[1].in_features, 2)
 )
-model1.load_state_dict(torch.load("model1.pth", map_location=device, weights_only=False))
-model1.to(device)
-model1.eval()
+
+model.load_state_dict(torch.load("efficientnet_model.pth", map_location=device))
+model.to(device)
+model.eval()
 
 # Class names
 class_names = ['damage', 'no_damage']
@@ -59,7 +63,7 @@ async def predict(file: UploadFile = File(...)):
     image = transform(image).unsqueeze(0).to(device)
 
     with torch.no_grad():
-        outputs = model1(image)
+        outputs = model(image)
         pred = torch.argmax(outputs, dim=1).item()
 
     return {"prediction": class_names[pred]}
