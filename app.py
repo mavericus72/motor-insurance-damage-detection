@@ -9,7 +9,7 @@ import requests
 app = FastAPI()
 
 # ------------------ DOWNLOAD MODEL ------------------
-MODEL_URL = "https://drive.google.com/uc?id=1iORK7v3n-L-FKU4Pfz-p2o1CTwoFHSzS"
+MODEL_URL = "https://github.com/mavericus72/motor-insurance-damage-detection/raw/refs/heads/main/model1.pth"
 MODEL_PATH = "model1.pth"
 
 def download_model():
