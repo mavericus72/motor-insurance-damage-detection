@@ -7,6 +7,7 @@ from torchvision import transforms, models
 from torch import nn
 import os
 import requests
+import torch.nn.functional as F
 
 app = FastAPI()
 
@@ -64,6 +65,25 @@ async def predict(file: UploadFile = File(...)):
 
     with torch.no_grad():
         outputs = model(image)
+        
+        # Get prediction
         pred = torch.argmax(outputs, dim=1).item()
+        
+        # ✅ Confidence
+        probs = F.softmax(outputs, dim=1)
+        confidence = probs[0][pred].item()
 
-    return {"prediction": class_names[pred]}
+    # ✅ Decision logic
+    if confidence < 0.75:
+        decision = "manual_review"
+    elif class_names[pred] == "damage":
+        decision = "approve_claim_flow"
+    else:
+        decision = "no_damage"
+
+    return {
+        "prediction": class_names[pred],
+        "confidence": round(confidence, 3),
+        "decision": decision
+    }
+
