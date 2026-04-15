@@ -69,11 +69,11 @@ async def predict(file: UploadFile = File(...)):
         # Get prediction
         pred = torch.argmax(outputs, dim=1).item()
         
-        # ✅ Confidence
+        # Confidence check
         probs = F.softmax(outputs, dim=1)
         confidence = probs[0][pred].item()
 
-    # ✅ Decision logic
+    # Decision logic check
     if confidence < 0.75:
         decision = "manual_review"
     elif class_names[pred] == "damage":
